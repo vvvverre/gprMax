@@ -747,6 +747,7 @@ cpdef void build_cylinder(
 
     cdef Py_ssize_t i, j, k
     cdef int xs, xf, ys, yf, zs, zf, xc, yc, zc
+    cdef int xi1, xi2, yi1, yi2, zi1, zi2
     cdef float f1f2mag, f2f1mag, f1ptmag, f2ptmag, dot1, dot2, factor1, factor2, theta1, theta2, distance1, distance2
     cdef bint build
     cdef np.ndarray f1f2, f2f1, f1pt, f2pt
@@ -755,21 +756,39 @@ cpdef void build_cylinder(
     if x1 < x2:
         xs = round_value((x1 - r) / dx) - 1
         xf = round_value((x2 + r) / dx) + 1
+		
+        xi1 = round_value(x1 / dz) - 1
+        xi2 = round_value(x2 / dz) + 1
     else:
         xs = round_value((x2 - r) / dx) - 1
         xf = round_value((x1 + r) / dx) + 1
+		
+        xi1 = round_value(x2 / dz) - 1
+        xi2 = round_value(x1 / dz) + 1
     if y1 < y2:
         ys = round_value((y1 - r) / dy) - 1
         yf = round_value((y2 + r) / dy) + 1
+		
+        yi1 = round_value(y1 / dz) - 1
+        yi2 = round_value(y2 / dz) + 1
     else:
         ys = round_value((y2 - r) / dy) - 1
         yf = round_value((y1 + r) / dy) + 1
+		
+        yi1 = round_value(y2 / dz) - 1
+        yi2 = round_value(y1 / dz) + 1
     if z1 < z2:
         zs = round_value((z1 - r) / dz) - 1
         zf = round_value((z2 + r) / dz) + 1
+		
+        zi1 = round_value(z1 / dz) - 1
+        zi2 = round_value(z2 / dz) + 1
     else:
         zs = round_value((z2 - r) / dz) - 1
         zf = round_value((z1 + r) / dz) + 1
+		
+        zi1 = round_value(z2 / dz) - 1
+        zi2 = round_value(z1 / dz) + 1
 
     # Set bounds to domain if they outside
     if xs < 0:
@@ -791,21 +810,21 @@ cpdef void build_cylinder(
         for j in range(ys, yf):
             for k in range(zs, zf):
                 if np.sqrt((j * dy + 0.5 * dy - y1)**2 + (k * dz + 0.5 * dz - z1)**2) <= r:
-                    for i in range(xs, xf):
+                    for i in range(xi1, xi2):
                         build_voxel(i, j, k, numID, numIDx, numIDy, numIDz, averaging, solid, rigidE, rigidH, ID)
     # y-aligned
     elif round_value(x1 / dx) == round_value(x2 / dx) and round_value(z1 / dz) == round_value(z2 / dz):
         for i in range(xs, xf):
             for k in range(zs, zf):
                 if np.sqrt((i * dx + 0.5 * dx - x1)**2 + (k * dz + 0.5 * dz - z1)**2) <= r:
-                    for j in range(ys, yf):
+                    for j in range(yi1, yi2):
                         build_voxel(i, j, k, numID, numIDx, numIDy, numIDz, averaging, solid, rigidE, rigidH, ID)
     # z-aligned
     elif round_value(x1 / dx) == round_value(x2 / dx) and round_value(y1 / dy) == round_value(y2 / dy):
         for i in range(xs, xf):
             for j in range(ys, yf):
                 if np.sqrt((i * dx + 0.5 * dx - x1)**2 + (j * dy + 0.5 * dy - y1)**2) <= r:
-                    for k in range(zs, zf):
+                    for k in range(zi1, zi2):
                         build_voxel(i, j, k, numID, numIDx, numIDy, numIDz, averaging, solid, rigidE, rigidH, ID)
 
     # Not aligned with any axis
